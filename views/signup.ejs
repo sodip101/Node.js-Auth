@@ -17,6 +17,8 @@
     const passwordError=document.querySelector('.password.error');
 
     form.addEventListener('submit',async(e)=>{
+
+        //this cancels/prevents default cancelable events
         e.preventDefault();
 
         //resetting errors

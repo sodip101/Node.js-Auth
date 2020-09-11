@@ -6,6 +6,16 @@ const errorHandler=(err)=>{
     console.log(err.message,err.code);
     let errors={email:'',password:''};
 
+    //incorrect email
+    if(err.message==='Invalid Email!'){
+        errors.email='The email you entered is invalid.';
+    }
+
+    //incorrect password
+    if(err.message==='Incorrect Password!'){
+        errors.email='The password you entered is incorrect.';
+    }
+
     //duplicate error code
     if(err.code===11000){
         errors.email='The email you entered has already been registered';
@@ -49,6 +59,25 @@ module.exports.signupPost=async(req,res)=>{
     }
 };
 
-module.exports.loginPost=(req,res)=>{
-    res.send('user login');
+module.exports.loginPost=async(req,res)=>{
+    const email=req.body.email;
+    const password=req.body.password;
+
+    try{
+        const user=await User.login(email,password);
+        const token=createToken(user._id);
+        res.cookie('jwt',token,{httpOnly:true,maxAge:maxAge*1000});
+        console.log('User: ',user._id);
+        res.status(200).json({user:user._id});
+    }
+    catch(err){
+        const errors=errorHandler(err);
+        console.log(errors);
+        res.status(400).json({errors});
+    }
 };
+
+module.exports.logout_get=(req,res)=>{
+    res.cookie('jwt','',{maxAge:1});
+    res.redirect('/');
+}
